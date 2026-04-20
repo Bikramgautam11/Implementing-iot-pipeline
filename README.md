@@ -1,10 +1,10 @@
-# 🧺 Lindstrom Mat Cleaning — Management App
+#  Lindstrom Mat Cleaning — Management App
 
 > A production-ready, zero-dependency web application for managing end-to-end carpet cleaning operations — from inventory tracking and urgent pickups to route optimization and AI workload forecasting.
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [Overview](#overview)
 - [Project Structure](#project-structure)
@@ -91,14 +91,14 @@ lindstrom/
 
 | Section | What it does |
 |---|---|
-| 📊 **Dashboard** | Live stats for total carpets, urgent count, active cleaning sessions, and ready-for-delivery. Shows capacity bars per category, active alerts for overstock/overdue, and a recent activity table with quick-action buttons. |
-| 🗺️ **Route Planner** | Interactive canvas map with TSP (nearest-neighbor) shortest-route algorithm. Urgent stops are weighted to appear first. Add stops manually by name or carpet ID. Auto-load all urgent carpets in one click. Shows estimated distance, time, and fuel. |
-| 🚨 **Urgent Queue** | Dedicated page for all urgently flagged carpets. Tracks overdue items (>24h), shows days waiting, reason for urgency, and lets you resolve or push directly into the route planner. |
-| ⏱️ **Cleaning Timers** | Real-time countdown timers per carpet with animated progress bars. Supports four session types (Standard 30 min / Deep Clean 60 min / Heavy Duty 90 min / Express 15 min). Turns red and shows OVERDUE when time expires. Auto-refreshes every 5 seconds. |
-| 🏷️ **Inventory** | Visual grid of all 200 storage cells (A01–A50, B01–B50, C01–C50, D01–D50). Colour-coded by status. Filter by category or status, search by ID or customer name. Click any cell for full details — change status, mark urgent, assign a worker. |
-| 🤖 **AI Forecast** | 14-day job volume bar chart with peak-day colour coding. Per-category demand forecast with trend arrows. Model feature importance scores. Staffing recommendations and inventory replenishment alerts. |
-| 📈 **Analytics** | Weekly throughput bar chart. Per-category KPIs: average cleaning time, on-time delivery rate, volume. Month-level headline stats. |
-| 📅 **Schedule** | Full daily job timeline with time slots, urgent highlighting, staff assignments, and status badges. Staff roster with shift status. Quick-assign tool to link carpet IDs to workers. |
+|  **Dashboard** | Live stats for total carpets, urgent count, active cleaning sessions, and ready-for-delivery. Shows capacity bars per category, active alerts for overstock/overdue, and a recent activity table with quick-action buttons. |
+|  **Route Planner** | Interactive canvas map with TSP (nearest-neighbor) shortest-route algorithm. Urgent stops are weighted to appear first. Add stops manually by name or carpet ID. Auto-load all urgent carpets in one click. Shows estimated distance, time, and fuel. |
+|  **Urgent Queue** | Dedicated page for all urgently flagged carpets. Tracks overdue items (>24h), shows days waiting, reason for urgency, and lets you resolve or push directly into the route planner. |
+|  **Cleaning Timers** | Real-time countdown timers per carpet with animated progress bars. Supports four session types (Standard 30 min / Deep Clean 60 min / Heavy Duty 90 min / Express 15 min). Turns red and shows OVERDUE when time expires. Auto-refreshes every 5 seconds. |
+|  **Inventory** | Visual grid of all 200 storage cells (A01–A50, B01–B50, C01–C50, D01–D50). Colour-coded by status. Filter by category or status, search by ID or customer name. Click any cell for full details — change status, mark urgent, assign a worker. |
+|  **AI Forecast** | 14-day job volume bar chart with peak-day colour coding. Per-category demand forecast with trend arrows. Model feature importance scores. Staffing recommendations and inventory replenishment alerts. |
+|  **Analytics** | Weekly throughput bar chart. Per-category KPIs: average cleaning time, on-time delivery rate, volume. Month-level headline stats. |
+|  **Schedule** | Full daily job timeline with time slots, urgent highlighting, staff assignments, and status badges. Staff roster with shift status. Quick-assign tool to link carpet IDs to workers. |
 
 ---
 
@@ -117,11 +117,11 @@ The inventory is divided into **four categories**, each with **50 storage cells*
 
 | Colour | Status | Meaning |
 |---|---|---|
-| 🔵 Blue | **Clean / Ready** | Carpet cleaned, ready for delivery |
-| 🟡 Amber | **Dirty** | Awaiting cleaning |
-| 🟢 Green | **Cleaning** | Currently being cleaned — timer running |
-| 🔴 Red (pulsing) | **Urgent** | Flagged for priority pickup/delivery |
-| ⬛ Dark | **Empty** | Cell is unoccupied |
+|  Blue | **Clean / Ready** | Carpet cleaned, ready for delivery |
+| Amber | **Dirty** | Awaiting cleaning |
+|  Green | **Cleaning** | Currently being cleaned — timer running |
+|  Red (pulsing) | **Urgent** | Flagged for priority pickup/delivery |
+|  Dark | **Empty** | Cell is unoccupied |
 
 ---
 
@@ -351,13 +351,13 @@ RMSE: ~2.3 jobs/day. Confidence: 89%.
 | Page | How to access |
 |---|---|
 | Dashboard | Default view on load |
-| Route Planner | Sidebar → 🗺️ Route Planner |
-| Urgent Queue | Sidebar → 🚨 Urgent Queue |
-| Cleaning Timers | Sidebar → ⏱️ Cleaning Timers |
-| Inventory | Sidebar → 🏷️ Carpet Inventory |
-| AI Forecast | Sidebar → 🤖 AI Workload Forecast |
-| Analytics | Sidebar → 📈 Analytics |
-| Daily Schedule | Sidebar → 📅 Daily Schedule |
+| Route Planner | Sidebar →  Route Planner |
+| Urgent Queue | Sidebar →  Urgent Queue |
+| Cleaning Timers | Sidebar →  Cleaning Timers |
+| Inventory | Sidebar →  Carpet Inventory |
+| AI Forecast | Sidebar →  AI Workload Forecast |
+| Analytics | Sidebar →  Analytics |
+| Daily Schedule | Sidebar →  Daily Schedule |
 | Add Carpet | Top-right button → **+ New Carpet** |
 
 ---
