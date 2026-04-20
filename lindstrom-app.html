@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lindstrom — Mat Cleaning Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Mulish:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   LINDSTROM — PRODUCTION APP
+   Design: Clean industrial / utilitarian-premium
+   Palette: Deep navy + electric teal + warm white
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#07080f;--navy2:#0d1120;--navy3:#121829;--navy4:#1a2236;--navy5:#222d45;
+  --teal:#00c2a8;--teal2:#00e8ca;--teal3:#00a890;--teal-dim:#003d36;
+  --amber:#f59e0b;--amber2:#fbbf24;--amber-dim:#3d2800;
+  --red:#ef4444;--red2:#f87171;--red-dim:#3d0f0f;
+  --green:#22c55e;--green2:#4ade80;--green-dim:#0d2e1a;
+  --text:#eef1f8;--text2:#8b96b0;--text3:#4a5568;
+  --border:#1e2a40;--border2:#2d3d5a;--border3:#3a4f72;
+  --radius:12px;--radius2:8px;--radius3:6px;
+  --font-head:'Syne',sans-serif;
+  --font-body:'Mulish',sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --glow:0 0 20px rgba(0,194,168,0.15);
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden;font-size:14px}
+
+/* Subtle grid texture */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,194,168,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(0,194,168,0.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+#sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:var(--navy2);border-right:1px solid var(--border);z-index:100;display:flex;flex-direction:column;padding:0}
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.sb-logo-mark{display:flex;align-items:center;gap:10px}
+.sb-icon{width:36px;height:36px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-brand{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.sb-sub{font-size:10px;color:var(--text3);margin-top:1px;letter-spacing:1px;text-transform:uppercase}
+.sb-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.sb-section{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:12px 8px 6px;font-weight:600}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius3);cursor:pointer;font-size:13px;color:var(--text2);transition:all .18s;margin-bottom:2px;font-weight:500;border:1px solid transparent}
+.sb-item:hover{background:var(--navy4);color:var(--text)}
+.sb-item.active{background:var(--teal-dim);color:var(--teal);border-color:rgba(0,194,168,0.2)}
+.sb-item .ic{font-size:15px;width:20px;text-align:center}
+.sb-item .badge-urg{background:var(--red);color:#fff;font-size:9px;padding:1px 6px;border-radius:10px;margin-left:auto;font-family:var(--font-mono)}
+.sb-footer{padding:16px;border-top:1px solid var(--border)}
+.sb-status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ── MAIN ─────────────────────────────────────────────────── */
+#main{margin-left:220px;min-height:100vh;position:relative;z-index:1}
+
+/* ── TOPBAR ───────────────────────────────────────────────── */
+#topbar{height:60px;background:rgba(7,8,15,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:var(--font-head);font-size:17px;font-weight:700;color:var(--text);flex:1}
+.topbar-subtitle{font-size:11px;color:var(--text3);margin-top:1px}
+.topbar-actions{display:flex;gap:8px;align-items:center}
+.tb-chip{display:flex;align-items:center;gap:6px;background:var(--navy4);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text2)}
+.tb-chip .dot{width:6px;height:6px;border-radius:50%}
+
+/* ── CONTENT ──────────────────────────────────────────────── */
+.page{display:none;padding:28px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── CARDS ────────────────────────────────────────────────── */
+.card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+.card-teal{border-color:rgba(0,194,168,0.25);box-shadow:var(--glow)}
+.card-amber{border-color:rgba(245,158,11,0.25)}
+.card-red{border-color:rgba(239,68,68,0.25)}
+.card-sm{background:var(--navy3);border:1px solid var(--border);border-radius:var(--radius2);padding:14px}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.gap12{gap:12px}
+
+/* ── STAT CARDS ───────────────────────────────────────────── */
+.stat-card{background:var(--navy2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.stat-card.teal::after{background:var(--teal)}
+.stat-card.amber::after{background:var(--amber)}
+.stat-card.red::after{background:var(--red)}
+.stat-card.green::after{background:var(--green)}
+.stat-icon{font-size:24px;margin-bottom:12px}
+.stat-val{font-family:var(--font-head);font-size:32px;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-size:11px;color:var(--text3);margin-top:6px;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.stat-delta{font-size:12px;margin-top:8px;font-weight:500}
+.delta-up{color:var(--green)}.delta-down{color:var(--red)}.delta-neutral{color:var(--text3)}
+
+/* ── HEADINGS ─────────────────────────────────────────────── */
+.page-title{font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.page-desc{font-size:13px;color:var(--text3);margin-bottom:24px}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--text);letter-spacing:.2px}
+.teal-line{display:flex;align-items:center;gap:8px}
+.teal-line::before{content:'';width:3px;height:16px;background:var(--teal);border-radius:2px}
+
+/* ── BUTTONS ──────────────────────────────────────────────── */
+.btn{font-family:var(--font-body);cursor:pointer;border:none;border-radius:var(--radius3);padding:9px 18px;font-size:13px;font-weight:600;transition:all .15s;display:inline-flex;align-items:center;gap:6px;letter-spacing:.2px}
+.btn-teal{background:var(--teal);color:#07080f}
+.btn-teal:hover{background:var(--teal2);transform:translateY(-1px)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-ghost:hover{background:var(--navy4);color:var(--text);border-color:var(--border3)}
+.btn-red{background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red2)}
+.btn-amber{background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber2)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px}
+
+/* ── TAGS / BADGES ────────────────────────────────────────── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.tag-a{background:#0d2040;color:#7ab8ff;border:1px solid #1a3a6a}
+.tag-b{background:#0d2e1a;color:#4ade80;border:1px solid #1a5a30}
+.tag-c{background:#2a1a00;color:#fbbf24;border:1px solid #5a3a00}
+.tag-d{background:#2a0d2a;color:#e879f9;border:1px solid #5a1a5a}
+.tag-urgent{background:var(--red-dim);color:var(--red2);border:1px solid rgba(239,68,68,.3);animation:urgentPulse 1.5s infinite}
+@keyframes urgentPulse{0%,100%{border-color:rgba(239,68,68,.3)}50%{border-color:rgba(239,68,68,.8)}}
+.tag-ok{background:var(--green-dim);color:var(--green2);border:1px solid rgba(34,197,94,.3)}
+.tag-warn{background:var(--amber-dim);color:var(--amber2);border:1px solid rgba(245,158,11,.3)}
+.tag-cleaning{background:#0d1e3d;color:#60a5fa;border:1px solid #1a3a6a}
+
+/* ── TABLE ────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;color:var(--text3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.tbl td{padding:11px 14px;border-bottom:1px solid rgba(30,42,64,.5);color:var(--text2);vertical-align:middle}
+.tbl td:first-child{color:var(--text);font-weight:500}
+.tbl tr:hover td{background:rgba(26,34,54,.5)}
+.tbl tr:last-child td{border-bottom:none}
+.mono{font-family:var(--font-mono);font-size:12px}
+
+/* ── PROGRESS ─────────────────────────────────────────────── */
+.prog-bg{background:var(--navy4);border-radius:20px;height:5px;overflow:hidden}
+.prog-fill{height:100%;border-radius:20px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* ── INPUT / SELECT ───────────────────────────────────────── */
+input[type=text],input[type=number],select,textarea{
+  background:var(--navy3);border:1px solid var(--border2);color:var(--text);
+  border-radius:var(--radius3);padding:9px 12px;font-size:13px;font-family:var(--font-body);
+  outline:none;transition:border .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--teal)}
+select option{background:var(--navy2)}
+label{font-size:12px;color:var(--text3);margin-bottom:5px;display:block;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.form-group{margin-bottom:12px}
+
+/* ── ROUTE CANVAS ─────────────────────────────────────────── */
+#route-canvas{width:100%;height:400px;background:var(--navy3);border-radius:var(--radius);border:1px solid var(--border);display:block}
+
+/* ── INVENTORY GRID ───────────────────────────────────────── */
+.inv-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:8px}
+.inv-cell{aspect-ratio:1;border-radius:3px;cursor:pointer;font-size:7px;font-family:var(--font-mono);display:flex;align-items:center;justify-content:center;font-weight:500;transition:all .12s;border:1px solid transparent;position:relative}
+.inv-cell:hover{transform:scale(1.2);z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.inv-cell.empty{background:var(--navy4);border-color:var(--border);color:var(--text3)}
+.inv-cell.clean{background:#0d2040;border-color:#1a3a6a;color:#7ab8ff}
+.inv-cell.dirty{background:#2a1a00;border-color:#5a3a00;color:#fbbf24}
+.inv-cell.cleaning{background:#0d2e1a;border-color:#1a5a30;color:#4ade80}
+.inv-cell.urgent{background:var(--red-dim);border-color:rgba(239,68,68,.5);color:var(--red2);animation:urgentCell 1.2s infinite}
+@keyframes urgentCell{0%,100%{border-color:rgba(239,68,68,.5)}50%{border-color:var(--red2)}}
+.inv-cell.selected{outline:2px solid var(--teal);outline-offset:1px;z-index:10}
+
+/* ── FORECAST CHART ───────────────────────────────────────── */
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:140px;padding:0 2px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:0}
+.bar{width:100%;border-radius:3px 3px 0 0;cursor:pointer;transition:opacity .2s;position:relative;min-height:4px}
+.bar:hover{opacity:.8}
+.bar-val{font-size:9px;color:var(--text3);font-family:var(--font-mono);text-align:center;margin-top:3px}
+.bar-lbl{font-size:9px;color:var(--text3);text-align:center;margin-top:2px}
+
+/* ── TIMER ────────────────────────────────────────────────── */
+.timer-ring{width:80px;height:80px;position:relative}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--teal)}
+
+/* ── ALERT BANNERS ────────────────────────────────────────── */
+.alert{padding:12px 16px;border-radius:var(--radius2);font-size:13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;line-height:1.5}
+.alert-red{background:var(--red-dim);border:1px solid rgba(239,68,68,.3);color:var(--red2)}
+.alert-amber{background:var(--amber-dim);border:1px solid rgba(245,158,11,.3);color:var(--amber2)}
+.alert-teal{background:var(--teal-dim);border:1px solid rgba(0,194,168,.3);color:var(--teal2)}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+
+/* ── TOGGLE ───────────────────────────────────────────────── */
+.toggle-row{display:flex;gap:6px;flex-wrap:wrap}
+.tgl{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text3);font-family:var(--font-body);transition:all .15s;letter-spacing:.3px}
+.tgl.on{background:var(--navy4);color:var(--text);border-color:var(--border3)}
+.tgl.teal-on{background:var(--teal-dim);color:var(--teal);border-color:rgba(0,194,168,.3)}
+
+/* ── SCHEDULE ITEMS ───────────────────────────────────────── */
+.sched-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--navy3);border-radius:var(--radius2);margin-bottom:6px;border:1px solid var(--border);transition:border .15s}
+.sched-item:hover{border-color:var(--border3)}
+.sched-item.urgent-item{border-color:rgba(239,68,68,.3);background:rgba(61,15,15,.4)}
+.sched-time{font-family:var(--font-mono);font-size:12px;color:var(--teal);min-width:46px}
+.sched-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sched-info{flex:1;min-width:0}
+.sched-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sched-addr{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* ── MISC ─────────────────────────────────────────────────── */
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap8{gap:8px}.gap12{gap:12px}.gap16{gap:16px}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.text-xs{font-size:11px}.text-sm{font-size:13px}.text-muted{color:var(--text3)}
+.w100{width:100%}.bold{font-weight:600}
+.ml-auto{margin-left:auto}
+.teal{color:var(--teal)}.amber{color:var(--amber)}.red-c{color:var(--red2)}.green-c{color:var(--green2)}
+
+/* ── DETAIL PANEL ─────────────────────────────────────────── */
+.detail-panel{background:var(--navy3);border:1px solid var(--teal);border-radius:var(--radius);padding:20px;margin-top:16px;display:none}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.detail-item{background:var(--navy4);border-radius:var(--radius3);padding:12px}
+.detail-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:4px}
+.detail-val{font-size:14px;font-weight:600;color:var(--text)}
+
+/* ── MODAL OVERLAY ────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--navy2);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:480px;max-width:95vw;box-shadow:var(--shadow)}
+.modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+
+/* ── LOADING BAR ──────────────────────────────────────────── */
+#loader{position:fixed;top:0;left:220px;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--teal),transparent);z-index:999;display:none;animation:load .8s linear}
+@keyframes load{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--navy2)}
+::-webkit-scrollbar-thumb{background:var(--navy5);border-radius:4px}
+
+/* Cat strip colors */
+.cat-strip-a{border-left:3px solid #7ab8ff}
+.cat-strip-b{border-left:3px solid #4ade80}
+.cat-strip-c{border-left:3px solid #fbbf24}
+.cat-strip-d{border-left:3px solid #e879f9}
+</style>
+</head>
+<body>
+
+<div id="loader"></div>
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
+<aside id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">
+      <div class="sb-icon">🧺</div>
+      <div>
+        <div class="sb-brand">Lindstrom</div>
+        <div class="sb-sub">Mat Cleaning</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <div class="sb-item active" onclick="nav('dashboard')" id="sb-dashboard"><span class="ic">📊</span>Dashboard</div>
+
+    <div class="sb-section">Operations</div>
+    <div class="sb-item" onclick="nav('route')" id="sb-route"><span class="ic">🗺️</span>Route Planner</div>
+    <div class="sb-item" onclick="nav('urgent')" id="sb-urgent"><span class="ic">🚨</span>Urgent Queue <span class="badge-urg" id="urg-count">0</span></div>
+    <div class="sb-item" onclick="nav('cleaning')" id="sb-cleaning"><span class="ic">⏱️</span>Cleaning Timers</div>
+
+    <div class="sb-section">Inventory</div>
+    <div class="sb-item" onclick="nav('inventory')" id="sb-inventory"><span class="ic">🏷️</span>Carpet Inventory</div>
+
+    <div class="sb-section">Intelligence</div>
+    <div class="sb-item" onclick="nav('forecast')" id="sb-forecast"><span class="ic">🤖</span>AI Workload Forecast</div>
+    <div class="sb-item" onclick="nav('analytics')" id="sb-analytics"><span class="ic">📈</span>Analytics</div>
+
+    <div class="sb-section">Team</div>
+    <div class="sb-item" onclick="nav('schedule')" id="sb-schedule"><span class="ic">📅</span>Daily Schedule</div>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-status"><span class="status-dot"></span>System Online</div>
+    <div class="text-xs text-muted mt8" style="margin-top:6px" id="clock-display"></div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══════════════════════════════════════════════ -->
+<main id="main">
+  <div id="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+    </div>
+    <div class="topbar-actions">
+      <div class="tb-chip"><span class="dot" style="background:var(--green)"></span>Helsinki Depot</div>
+      <div class="tb-chip" id="date-chip">Mon 13 Apr</div>
+      <button class="btn btn-teal btn-sm" onclick="openAddModal()">+ New Carpet</button>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══════════════════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-title">Good morning, Operations 👋</div>
+    <div class="page-desc">Here's what's happening today at Lindstrom.</div>
+
+    <div class="grid4 mb16">
+      <div class="stat-card teal">
+        <div class="stat-icon">📦</div>
+        <div class="stat-val" id="d-total">187</div>
+        <div class="stat-label">Total Carpets</div>
+        <div class="stat-delta delta-up">↑ 12 received today</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-val red-c" id="d-urgent">0</div>
+        <div class="stat-label">Urgent Pickups</div>
+        <div class="stat-delta delta-down" id="d-urgent-sub">Needs immediate action</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-val amber" id="d-cleaning">0</div>
+        <div class="stat-label">Currently Cleaning</div>
+        <div class="stat-delta delta-neutral">Active right now</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-val green-c" id="d-ready">0</div>
+        <div class="stat-label">Ready for Delivery</div>
+        <div class="stat-delta delta-up">↑ 8 completed today</div>
+      </div>
+    </div>
+
+    <div class="grid2 mb16">
+      <div class="card">
+        <div class="section-head">
+          <div class="section-title teal-line">Active Alerts</div>
+        </div>
+        <div id="dash-alerts"></div>
+      </div>
+      <div class="card">
+        <div class="section-head">
+          <div class="section-title teal-line">Category Capacity</div>
+        </div>
+        <div id="cat-capacity"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-head">
+        <div class="section-title teal-line">Recent Activity</div>
+        <button class="btn btn-ghost btn-sm" onclick="nav('inventory')">View All →</button>
+      </div>
+      <table class="tbl">
+        <thead><tr><th>Carpet ID</th><th>Category</th><th>Customer</th><th>Size m²</th><th>Status</th><th>Worker</th><th>Action</th></tr></thead>
+        <tbody id="dash-recent"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ ROUTE PLANNER ════════════════════════════════════ -->
+  <div class="page" id="page-route">
+    <div class="page-title">Route Planner</div>
+    <div class="page-desc">Shortest path optimization using nearest-neighbor TSP algorithm. Urgent carpets are automatically prioritized.</div>
+
+    <div class="grid2 mb16" style="grid-template-columns:340px 1fr;gap:16px">
+      <!-- Left panel -->
+      <div>
+        <div class="card mb12" style="margin-bottom:12px">
+          <div class="section-head mb12">
+            <div class="section-title teal-line">Stop Queue</div>
+            <button class="btn btn-ghost btn-sm" onclick="autoLoadRoute()">Auto-load Urgent</button>
+          </div>
+          <div id="stop-list" style="max-height:200px;overflow-y:auto"></div>
+          <hr class="divider">
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" id="inp-stop-name" placeholder="Customer name or address">
+          </div>
+          <div class="grid2 gap12" style="gap:8px">
+            <div class="form-group" style="margin-bottom:0">
+              <label>Carpet ID</label>
+              <input type="text" id="inp-stop-id" placeholder="e.g. A14">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Priority</label>
+              <select id="inp-priority">
+                <option value="normal">Normal</option>
+                <option value="urgent">🚨 Urgent</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-teal w100 mt8" style="margin-top:10px;width:100%" onclick="addRouteStop()">+ Add Stop</button>
+        </div>
+
+        <div class="card card-teal">
+          <div class="section-title teal-line mb12" style="margin-bottom:12px">Route Summary</div>
+          <div id="route-summary-items"></div>
+          <hr class="divider">
+          <button class="btn btn-teal w100" style="width:100%" onclick="optimizeRoute()">⚡ Optimize Route</button>
+          <button class="btn btn-ghost w100 mt8" style="width:100%;margin-top:8px" onclick="clearRoute()">Clear All Stops</button>
+        </div>
+      </div>
+
+      <!-- Map canvas -->
+      <div>
+        <canvas id="route-canvas"></canvas>
+        <div class="card mt12" style="margin-top:12px">
+          <div class="section-title teal-line mb8" style="margin-bottom:8px">Algorithm Notes</div>
+          <p class="text-sm text-muted" style="line-height:1.7">Nearest-neighbor heuristic with urgent-first weighting. Urgent stops receive a distance penalty so they always cluster near the start of the route. The algorithm loops back to depot automatically. Average savings vs random: <span class="teal bold">~34%</span>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ URGENT QUEUE ══════════════════════════════════════ -->
+  <div class="page" id="page-urgent">
+    <div class="page-title">Urgent Pickup Queue</div>
+    <div class="page-desc">Carpets marked urgent are highlighted here and automatically weighted in route planning.</div>
+
+    <div class="grid3 mb16">
+      <div class="stat-card red">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-val red-c" id="urg-stat1">0</div>
+        <div class="stat-label">Awaiting Pickup</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-val amber" id="urg-stat2">0</div>
+        <div class="stat-label">Overdue (&gt;24h)</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-val green-c" id="urg-stat3">0</div>
+        <div class="stat-label">Resolved Today</div>
+      </div>
+    </div>
+
+    <div class="card card-red">
+      <div class="section-head mb12">
+        <div class="section-title teal-line">Urgent Carpets</div>
+        <button class="btn btn-teal btn-sm" onclick="nav('route')">Plan Route →</button>
+      </div>
+      <div id="urgent-list"></div>
+    </div>
+
+    <div class="card mt16" style="margin-top:16px">
+      <div class="section-head mb12">
+        <div class="section-title teal-line">Mark Carpet Urgent</div>
+      </div>
+      <div class="flex gap8 items-center" style="gap:8px">
+        <input type="text" id="urg-input" placeholder="Enter carpet ID (e.g. B22)" style="max-width:220px">
+        <select id="urg-reason" style="max-width:200px">
+          <option>Customer deadline</option>
+          <option>Event tomorrow</option>
+          <option>Overdue collection</option>
+          <option>VIP customer</option>
+          <option>Damaged — priority clean</option>
+        </select>
+        <button class="btn btn-red" onclick="markUrgent()">Mark Urgent</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CLEANING TIMERS ═══════════════════════════════════ -->
+  <div class="page" id="page-cleaning">
+    <div class="page-title">Cleaning Timers</div>
+    <div class="page-desc">Track real-time cleaning progress for each active carpet. Timers start automatically when status changes to "Cleaning".</div>
+
+    <div class="grid2 mb16">
+      <div class="card card-teal">
+        <div class="section-head mb12">
+          <div class="section-title teal-line">Active Cleaning Sessions</div>
+          <span class="text-xs teal" id="active-timer-count">0 active</span>
+        </div>
+        <div id="timer-list"></div>
+        <hr class="divider">
+        <div class="form-group">
+          <label>Start Timer for Carpet</label>
+          <div class="flex gap8" style="gap:8px">
+            <input type="text" id="timer-input" placeholder="Carpet ID e.g. C18" style="flex:1">
+            <select id="timer-type" style="max-width:160px">
+              <option value="30">Standard (30 min)</option>
+              <option value="60">Deep Clean (60 min)</option>
+              <option value="90">Heavy Duty (90 min)</option>
+              <option value="15">Express (15 min)</option>
+            </select>
+            <button class="btn btn-teal" onclick="startTimer()">▶ Start</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title teal-line mb12" style="margin-bottom:12px">Cleaning Standards</div>
+        <table class="tbl">
+          <thead><tr><th>Type</th><th>Avg Time</th><th>Method</th></tr></thead>
+          <tbody>
+            <tr><td>Standard</td><td class="mono teal">30 min</td><td class="text-muted">Hot water extraction</td></tr>
+            <tr><td>Deep Clean</td><td class="mono teal">60 min</td><td class="text-muted">Pre-treat + extraction</td></tr>
+            <tr><td>Heavy Duty</td><td class="mono teal">90 min</td><td class="text-muted">Chemical soak + rinse</td></tr>
+            <tr><td>Express</td><td class="mono teal">15 min</td><td class="text-muted">Surface clean only</td></tr>
+            <tr><td>Stain Removal</td><td class="mono amber">+20 min</td><td class="text-muted">Spot treatment</td></tr>
+          </tbody>
+        </table>
+        <div class="card-sm mt12" style="margin-top:12px">
+          <div class="section-title mb8" style="margin-bottom:8px;font-size:13px">Today's Cleaning Stats</div>
+          <div class="grid2" style="gap:8px">
+            <div><div class="text-xs text-muted">Completed</div><div class="bold teal" id="clean-done">0</div></div>
+            <div><div class="text-xs text-muted">In Progress</div><div class="bold amber" id="clean-active">0</div></div>
+            <div><div class="text-xs text-muted">Avg Duration</div><div class="bold green-c">38 min</div></div>
+            <div><div class="text-xs text-muted">Efficiency</div><div class="bold teal">94%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ INVENTORY ═════════════════════════════════════════ -->
+  <div class="page" id="page-inventory">
+    <div class="page-title">Carpet Inventory</div>
+    <div class="page-desc">200 storage cells — A01–A50 (Household) · B01–B50 (Industrial) · C01–C50 (School) · D01–D50 (Design)</div>
+
+    <div class="card mb16" style="margin-bottom:14px">
+      <div class="flex gap8 items-center" style="flex-wrap:wrap;gap:10px">
+        <div class="toggle-row">
+          <span class="text-xs text-muted" style="align-self:center;margin-right:4px">CATEGORY:</span>
+          <button class="tgl teal-on" id="fi-all" onclick="filterInv('all',this)">All</button>
+          <button class="tgl" id="fi-A" onclick="filterInv('A',this)">A – Household</button>
+          <button class="tgl" id="fi-B" onclick="filterInv('B',this)">B – Industrial</button>
+          <button class="tgl" id="fi-C" onclick="filterInv('C',this)">C – School</button>
+          <button class="tgl" id="fi-D" onclick="filterInv('D',this)">D – Design</button>
+        </div>
+        <div class="toggle-row" style="margin-left:auto">
+          <span class="text-xs text-muted" style="align-self:center;margin-right:4px">STATUS:</span>
+          <button class="tgl on" id="fs-all" onclick="filterStatus('all',this)">All</button>
+          <button class="tgl" id="fs-urgent" onclick="filterStatus('urgent',this)">🚨 Urgent</button>
+          <button class="tgl" id="fs-cleaning" onclick="filterStatus('cleaning',this)">Cleaning</button>
+          <button class="tgl" id="fs-clean" onclick="filterStatus('clean',this)">Ready</button>
+          <button class="tgl" id="fs-empty" onclick="filterStatus('empty',this)">Empty</button>
+        </div>
+        <input type="text" id="inv-search" placeholder="Search ID or customer…" style="width:180px" oninput="searchInv(this.value)">
+      </div>
+
+      <!-- Legend -->
+      <div class="flex gap16 mt12" style="gap:16px;flex-wrap:wrap;margin-top:10px">
+        <div class="flex gap8 items-center text-xs text-muted" style="gap:6px"><span style="width:10px;height:10px;background:#0d2040;border:1px solid #1a3a6a;border-radius:2px;display:inline-block"></span>Ready/Clean</div>
+        <div class="flex gap8 items-center text-xs text-muted" style="gap:6px"><span style="width:10px;height:10px;background:#2a1a00;border:1px solid #5a3a00;border-radius:2px;display:inline-block"></span>Dirty (needs cleaning)</div>
+        <div class="flex gap8 items-center text-xs text-muted" style="gap:6px"><span style="width:10px;height:10px;background:#0d2e1a;border:1px solid #1a5a30;border-radius:2px;display:inline-block"></span>Currently Cleaning</div>
+        <div class="flex gap8 items-center text-xs text-muted" style="gap:6px"><span style="width:10px;height:10px;background:var(--red-dim);border:1px solid rgba(239,68,68,.5);border-radius:2px;display:inline-block"></span>Urgent</div>
+        <div class="flex gap8 items-center text-xs text-muted" style="gap:6px"><span style="width:10px;height:10px;background:var(--navy4);border:1px solid var(--border);border-radius:2px;display:inline-block"></span>Empty</div>
+      </div>
+    </div>
+
+    <div id="inv-sections"></div>
+
+    <!-- Detail panel -->
+    <div class="detail-panel" id="cell-panel">
+      <div class="flex justify-between items-center mb12">
+        <div class="section-title teal-line" id="cell-panel-title">Cell A01</div>
+        <div class="flex gap8" style="gap:8px">
+          <button class="btn btn-amber btn-sm" id="cell-btn-urgent" onclick="toggleCellUrgent()">🚨 Mark Urgent</button>
+          <button class="btn btn-teal btn-sm" id="cell-btn-status" onclick="cycleCellStatus()">Change Status</button>
+          <button class="btn btn-ghost btn-sm" onclick="closePanel()">✕</button>
+        </div>
+      </div>
+      <div class="detail-grid" id="cell-panel-body"></div>
+    </div>
+  </div>
+
+  <!-- ══ AI FORECAST ════════════════════════════════════════ -->
+  <div class="page" id="page-forecast">
+    <div class="page-title">AI Workload Forecast</div>
+    <div class="page-desc">Machine learning model predicts upcoming job volume, peak days, and staffing needs using historical patterns, seasonal data, and customer cycles.</div>
+
+    <div class="grid4 mb16">
+      <div class="stat-card teal">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-val teal">89%</div>
+        <div class="stat-label">Model Accuracy</div>
+        <div class="stat-delta delta-up">↑ trained on 18 months</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-icon">📈</div>
+        <div class="stat-val amber">+34%</div>
+        <div class="stat-label">Peak This Friday</div>
+        <div class="stat-delta delta-neutral">vs average weekday</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-val red-c">3</div>
+        <div class="stat-label">Overload Days (30d)</div>
+        <div class="stat-delta delta-down">Capacity may breach</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">👥</div>
+        <div class="stat-val green-c">+2</div>
+        <div class="stat-label">Extra Staff Needed</div>
+        <div class="stat-delta delta-neutral">Fri & next Mon</div>
+      </div>
+    </div>
+
+    <div class="grid2 mb16">
+      <div class="card">
+        <div class="section-head mb12">
+          <div class="section-title teal-line">14-Day Job Volume Forecast</div>
+          <button class="btn btn-ghost btn-sm" onclick="rerunForecast()">↻ Refresh</button>
+        </div>
+        <div class="bar-chart" id="forecast-bars"></div>
+        <div class="flex mt8" id="forecast-day-labels" style="gap:4px"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title teal-line mb12" style="margin-bottom:12px">Model Features</div>
+        <div id="ml-features"></div>
+        <div class="card-sm mt12" style="margin-top:12px;padding:12px">
+          <div class="text-xs text-muted mb8" style="margin-bottom:6px">Algorithm</div>
+          <div class="text-sm text-muted" style="line-height:1.7">XGBoost gradient-boosted regression with 7-day rolling features. RMSE: 2.3 jobs/day. Seasonal decomposition applied before training.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2 mb16">
+      <div class="card">
+        <div class="section-title teal-line mb12" style="margin-bottom:12px">Category Demand Forecast (Next 7 Days)</div>
+        <div id="cat-demand"></div>
+      </div>
+      <div class="card">
+        <div class="section-title teal-line mb12" style="margin-bottom:12px">Staffing Recommendations</div>
+        <div id="staff-recs"></div>
+        <hr class="divider">
+        <div class="section-title mb8" style="margin-bottom:8px;font-size:13px">Inventory Alert Forecast</div>
+        <div id="inv-alerts-fc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ANALYTICS ═════════════════════════════════════════ -->
+  <div class="page" id="page-analytics">
+    <div class="page-title">Analytics</div>
+    <div class="page-desc">Performance metrics, throughput, and operational KPIs.</div>
+
+    <div class="grid4 mb16">
+      <div class="stat-card teal"><div class="stat-icon">🏁</div><div class="stat-val teal">1,247</div><div class="stat-label">Carpets This Month</div><div class="stat-delta delta-up">↑ 14% vs last month</div></div>
+      <div class="stat-card green"><div class="stat-icon">⚡</div><div class="stat-val green-c">38 min</div><div class="stat-label">Avg Clean Time</div><div class="stat-delta delta-up">↓ 4 min improved</div></div>
+      <div class="stat-card amber"><div class="stat-icon">🚗</div><div class="stat-val amber">312 km</div><div class="stat-label">Total Route This Week</div><div class="stat-delta delta-down">↑ 18 km vs target</div></div>
+      <div class="stat-card teal"><div class="stat-icon">😊</div><div class="stat-val teal">97%</div><div class="stat-label">On-Time Delivery</div><div class="stat-delta delta-up">↑ 2% this week</div></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="section-title teal-line mb12" style="margin-bottom:12px">Weekly Throughput (carpets/day)</div>
+        <div class="bar-chart" id="analytics-bars"></div>
+        <div class="flex" id="analytics-labels" style="gap:4px;margin-top:4px"></div>
+      </div>
+      <div class="card">
+        <div class="section-title teal-line mb12" style="margin-bottom:12px">Performance by Category</div>
+        <div id="perf-by-cat"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SCHEDULE ═══════════════════════════════════════════ -->
+  <div class="page" id="page-schedule">
+    <div class="page-title">Daily Schedule</div>
+    <div class="page-desc">Today's job assignments, routes, and staff allocation.</div>
+
+    <div class="grid2 mb16">
+      <div class="card">
+        <div class="section-head mb12">
+          <div class="section-title teal-line">Today's Jobs</div>
+          <button class="btn btn-teal btn-sm" onclick="addJobModal()">+ Add Job</button>
+        </div>
+        <div id="schedule-list"></div>
+      </div>
+      <div>
+        <div class="card mb12" style="margin-bottom:12px">
+          <div class="section-title teal-line mb12" style="margin-bottom:12px">Staff On Shift</div>
+          <div id="staff-on-shift"></div>
+          <hr class="divider">
+          <div class="form-group mb8">
+            <label>Quick Assign</label>
+            <div class="flex gap8" style="gap:8px">
+              <input type="text" id="qa-carpet" placeholder="Carpet ID" style="flex:1">
+              <select id="qa-staff" style="flex:1">
+                <option>Mikael H.</option><option>Sari K.</option>
+                <option>Jonas P.</option><option>Elin V.</option><option>Petri L.</option>
+              </select>
+              <button class="btn btn-teal btn-sm" onclick="quickAssign()">Assign</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title teal-line mb12" style="margin-bottom:12px">Shift Summary</div>
+          <div id="shift-summary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══ MODAL ═══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">🧺 Add New Carpet</div>
+    <div class="grid2" style="gap:12px">
+      <div class="form-group"><label>Cell ID</label><input type="text" id="m-id" placeholder="e.g. A15 or B33"></div>
+      <div class="form-group"><label>Category</label><select id="m-cat"><option value="A">A – Household</option><option value="B">B – Industrial</option><option value="C">C – School</option><option value="D">D – Design</option></select></div>
+      <div class="form-group"><label>Customer</label><input type="text" id="m-customer" placeholder="Customer name"></div>
+      <div class="form-group"><label>Size (m²)</label><input type="number" id="m-size" placeholder="e.g. 4.5" step="0.1"></div>
+      <div class="form-group"><label>Status</label><select id="m-status"><option value="dirty">Dirty – needs cleaning</option><option value="cleaning">Currently Cleaning</option><option value="clean">Clean – ready</option></select></div>
+      <div class="form-group"><label>Urgent?</label><select id="m-urgent"><option value="no">No</option><option value="yes">🚨 Yes – urgent</option></select></div>
+    </div>
+    <div class="form-group"><label>Notes</label><textarea id="m-notes" rows="2" placeholder="Any special notes…"></textarea></div>
+    <div class="flex gap8 mt16" style="gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-teal" onclick="saveCarpet()">Save Carpet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  LINDSTROM APP — CORE DATA & LOGIC
+// ══════════════════════════════════════════════════════════
+
+// ── Inventory Data ──────────────────────────────────────
+const CATS = {A:'Household',B:'Industrial',C:'School',D:'Design'};
+const CAT_COLORS = {A:'#7ab8ff',B:'#4ade80',C:'#fbbf24',D:'#e879f9'};
+const STATUS_ORDER = ['urgent','dirty','cleaning','clean','empty'];
+const CUSTOMERS_A = ['Korhonen','Mäkinen','Leinonen','Virtanen','Hämäläinen','Räsänen'];
+const CUSTOMERS_B = ['Teollisuus Oy','Metsä Group','Outokumpu','VR Group','Neste','Fortum'];
+const CUSTOMERS_C = ['Alppila School','Pasila Academy','Kallio Institute','Töölö Primary','Itäkeskus High'];
+const CUSTOMERS_D = ['Studio Alvar','Artek HQ','Design Forum','Marimekko','Iittala'];
+
+function makeInventory() {
+  const inv = {};
+  ['A','B','C','D'].forEach(cat => {
+    for(let i=1; i<=50; i++) {
+      const id = cat + String(i).padStart(2,'0');
+      const r = Math.random();
+      let status;
+      if(r < 0.18) status = 'empty';
+      else if(r < 0.42) status = 'dirty';
+      else if(r < 0.68) status = 'clean';
+      else if(r < 0.84) status = 'cleaning';
+      else status = 'dirty';
+
+      const customers = {A:CUSTOMERS_A,B:CUSTOMERS_B,C:CUSTOMERS_C,D:CUSTOMERS_D}[cat];
+      inv[id] = {
+        id, cat, num: i, status,
+        customer: status==='empty' ? null : customers[Math.floor(Math.random()*customers.length)],
+        area: status==='empty' ? 0 : parseFloat((1.2 + Math.random()*14).toFixed(1)),
+        urgent: false,
+        notes: '',
+        added: status==='empty' ? null : `2025-0${Math.floor(Math.random()*9)+1}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`,
+        worker: status==='cleaning' ? ['Mikael H.','Sari K.','Jonas P.','Elin V.'][Math.floor(Math.random()*4)] : null,
+        cleanStart: status==='cleaning' ? Date.now() - Math.floor(Math.random()*45)*60000 : null,
+        cleanDuration: [30,60,90,15][Math.floor(Math.random()*4)],
+      };
+    }
+  });
+  // Seed some urgents
+  ['A07','B22','C14','A31','D05'].forEach(id=>{
+    if(inv[id] && inv[id].status!=='empty') inv[id].urgent = true;
+  });
+  return inv;
+}
+
+let INV = makeInventory();
+let selectedCell = null;
+let activeTimers = {};
+let timerIntervals = {};
+
+// ── Route Data ──────────────────────────────────────────
+let routeStops = [
+  {id:1, name:'Lindstrom Depot (HQ)', carpetId:null, x:310, y:200, base:true, urgent:false},
+];
+let stopCounter = 2;
+
+const SAMPLE_LOCATIONS = [
+  {name:'Korhonen — Kallio',x:180,y:130},{name:'Teollisuus Oy — Pasila',x:420,y:90},
+  {name:'Alppila School',x:490,y:250},{name:'Studio Alvar — Ullanlinna',x:370,y:340},
+  {name:'Virtanen — Töölö',x:210,y:280},{name:'Metsä Group — Vuosaari',x:540,y:180},
+  {name:'Räsänen Residence',x:120,y:220},{name:'Itäkeskus High School',x:560,y:310},
+];
+
+// ── Navigation ───────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:'Dashboard', route:'Route Planner', urgent:'Urgent Queue',
+  cleaning:'Cleaning Timers', inventory:'Carpet Inventory',
+  forecast:'AI Workload Forecast', analytics:'Analytics', schedule:'Daily Schedule'
+};
+
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('sb-'+page).classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[page];
+
+  showLoader();
+  setTimeout(()=>{
+    if(page==='route') { renderStopList(); drawRoute(); }
+    if(page==='inventory') renderInventory();
+    if(page==='forecast') renderForecast();
+    if(page==='analytics') renderAnalytics();
+    if(page==='schedule') renderSchedule();
+    if(page==='urgent') renderUrgentPage();
+    if(page==='cleaning') renderTimers();
+    if(page==='dashboard') renderDashboard();
+    hideLoader();
+  }, 200);
+}
+
+function showLoader(){document.getElementById('loader').style.display='block'}
+function hideLoader(){setTimeout(()=>document.getElementById('loader').style.display='none',300)}
+
+// ── Clock ────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('fi-FI',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const d = now.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  const el = document.getElementById('clock-display');
+  if(el) el.textContent = t;
+  const dc = document.getElementById('date-chip');
+  if(dc) dc.textContent = d;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Dashboard ─────────────────────────────────────────────
+function renderDashboard() {
+  const all = Object.values(INV);
+  const urgent = all.filter(c=>c.urgent).length;
+  const cleaning = all.filter(c=>c.status==='cleaning').length;
+  const ready = all.filter(c=>c.status==='clean').length;
+
+  document.getElementById('d-total').textContent = all.filter(c=>c.status!=='empty').length;
+  document.getElementById('d-urgent').textContent = urgent;
+  document.getElementById('d-cleaning').textContent = cleaning;
+  document.getElementById('d-ready').textContent = ready;
+  document.getElementById('urg-count').textContent = urgent;
+
+  // Alerts
+  const alertsEl = document.getElementById('dash-alerts');
+  const alerts = [];
+  if(urgent>0) alerts.push({cls:'alert-red',icon:'🚨',msg:`${urgent} carpets marked urgent — immediate pickup required`});
+  const overdueC = all.filter(c=>c.status==='dirty' && c.added && daysDiff(c.added)>2);
+  if(overdueC.length) alerts.push({cls:'alert-amber',icon:'⏰',msg:`${overdueC.length} carpets overdue for cleaning (>2 days)`});
+  const capC = getCapacityWarnings();
+  capC.forEach(w=>alerts.push({cls:'alert-amber',icon:'⚠️',msg:w}));
+  alerts.push({cls:'alert-teal',icon:'✓',msg:`Route optimized — ${43+routeStops.length} km estimated today`});
+  alertsEl.innerHTML = alerts.slice(0,4).map(a=>`<div class="alert ${a.cls}"><span class="alert-icon">${a.icon}</span><span>${a.msg}</span></div>`).join('');
+
+  // Category capacity
+  const capEl = document.getElementById('cat-capacity');
+  capEl.innerHTML = ['A','B','C','D'].map(cat=>{
+    const count = all.filter(c=>c.cat===cat && c.status!=='empty').length;
+    const pct = Math.round(count/50*100);
+    return `<div style="margin-bottom:12px">
+      <div class="flex justify-between text-sm mb8" style="margin-bottom:4px">
+        <span>${cat} – ${CATS[cat]}</span>
+        <span class="mono" style="color:${CAT_COLORS[cat]}">${count}/50</span>
+      </div>
+      <div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:${CAT_COLORS[cat]}"></div></div>
+    </div>`;
+  }).join('');
+
+  // Recent jobs
+  const recent = all.filter(c=>c.status!=='empty').slice(0,8);
+  const tbody = document.getElementById('dash-recent');
+  tbody.innerHTML = recent.map(c=>`
+    <tr>
+      <td><span class="mono">${c.id}</span> ${c.urgent?'<span class="tag tag-urgent">🚨 URGENT</span>':''}</td>
+      <td><span class="tag tag-${c.cat.toLowerCase()}">${c.cat} – ${CATS[c.cat]}</span></td>
+      <td>${c.customer||'—'}</td>
+      <td class="mono">${c.area} m²</td>
+      <td>${statusTag(c)}</td>
+      <td>${c.worker||'—'}</td>
+      <td>
+        <button class="btn btn-ghost btn-xs" onclick="selectAndViewCell('${c.id}')">View</button>
+        ${!c.urgent?`<button class="btn btn-red btn-xs" style="margin-left:4px" onclick="quickMarkUrgent('${c.id}')">Urgent</button>`:''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function statusTag(c) {
+  if(c.urgent) return '<span class="tag tag-urgent">🚨 Urgent</span>';
+  const map = {dirty:'<span class="tag tag-warn">Dirty</span>',cleaning:'<span class="tag tag-cleaning">Cleaning</span>',clean:'<span class="tag tag-ok">Ready</span>',empty:'<span class="tag" style="background:var(--navy4);color:var(--text3)">Empty</span>'};
+  return map[c.status]||c.status;
+}
+
+function daysDiff(dateStr) {
+  const d = new Date(dateStr);
+  return Math.floor((Date.now()-d)/86400000);
+}
+
+function getCapacityWarnings() {
+  const warnings = [];
+  ['A','B','C','D'].forEach(cat=>{
+    const count = Object.values(INV).filter(c=>c.cat===cat && c.status!=='empty').length;
+    if(count>=48) warnings.push(`Category ${cat} (${CATS[cat]}) at ${count}/50 — nearly full`);
+  });
+  return warnings;
+}
+
+// ── Route Planner ─────────────────────────────────────────
+function renderStopList() {
+  const el = document.getElementById('stop-list');
+  el.innerHTML = routeStops.map((s,i)=>`
+    <div class="sched-item ${s.urgent?'urgent-item':''}" style="margin-bottom:5px;padding:8px 12px">
+      <div class="sched-dot" style="background:${s.base?'#fff':s.urgent?'var(--red)':'var(--teal)'}"></div>
+      <div class="sched-info">
+        <div class="sched-name" style="font-size:12px">${i===0?'⚑ ':s.urgent?'🚨 ':''}${s.name}</div>
+        ${s.carpetId?`<div class="sched-addr">ID: <span class="mono">${s.carpetId}</span></div>`:''}
+      </div>
+      ${s.urgent?'<span class="tag tag-urgent" style="font-size:9px">URGENT</span>':''}
+      ${!s.base?`<button class="btn btn-ghost btn-xs" style="margin-left:4px" onclick="removeStop(${s.id})">✕</button>`:''}
+    </div>
+  `).join('');
+  updateRouteSummary();
+}
+
+function addRouteStop() {
+  const name = document.getElementById('inp-stop-name').value.trim();
+  const carpetId = document.getElementById('inp-stop-id').value.trim().toUpperCase();
+  const priority = document.getElementById('inp-priority').value;
+  if(!name && !carpetId) { alert('Enter a location name or carpet ID'); return; }
+  const label = name || (carpetId ? (INV[carpetId]?.customer||carpetId) : 'Stop');
+  routeStops.push({
+    id: stopCounter++,
+    name: label,
+    carpetId: carpetId||null,
+    x: 80 + Math.random()*460,
+    y: 60 + Math.random()*300,
+    base: false,
+    urgent: priority==='urgent'
+  });
+  document.getElementById('inp-stop-name').value='';
+  document.getElementById('inp-stop-id').value='';
+  renderStopList(); drawRoute();
+}
+
+function removeStop(id) {
+  routeStops = routeStops.filter(s=>s.id!==id);
+  renderStopList(); drawRoute();
+}
+
+function autoLoadRoute() {
+  const urgents = Object.values(INV).filter(c=>c.urgent && c.status!=='empty');
+  urgents.forEach(c=>{
+    if(!routeStops.find(s=>s.carpetId===c.id)) {
+      routeStops.push({id:stopCounter++,name:c.customer||c.id,carpetId:c.id,x:80+Math.random()*460,y:60+Math.random()*300,base:false,urgent:true});
+    }
+  });
+  if(!urgents.length) alert('No urgent carpets found!');
+  renderStopList(); drawRoute();
+}
+
+function clearRoute() {
+  routeStops = [routeStops[0]];
+  renderStopList(); drawRoute();
+}
+
+function optimizeRoute() {
+  drawRoute(true);
+  updateRouteSummary();
+  showToast('Route optimized! 🎯');
+}
+
+function updateRouteSummary() {
+  const n = routeStops.length - 1;
+  const km = (18 + n * 3.2).toFixed(1);
+  const mins = Math.round(35 + n * 9);
+  const h = Math.floor(mins/60), m = mins%60;
+  const urgentN = routeStops.filter(s=>s.urgent).length;
+  document.getElementById('route-summary-items').innerHTML = `
+    <div class="ml-row" style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span class="text-muted">Stops</span><span class="mono teal">${n}</span></div>
+    <div class="ml-row" style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span class="text-muted">Urgent</span><span class="mono red-c">${urgentN}</span></div>
+    <div class="ml-row" style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span class="text-muted">Total Distance</span><span class="mono teal">${km} km</span></div>
+    <div class="ml-row" style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span class="text-muted">Est. Time</span><span class="mono teal">${h?h+'h ':''}${m}min</span></div>
+    <div class="ml-row" style="display:flex;justify-content:space-between;padding:7px 0"><span class="text-muted">Fuel est.</span><span class="mono amber">${(km*0.095).toFixed(1)} L</span></div>
+  `;
+}
+
+// TSP nearest-neighbor with urgent-first weighting
+function tspRoute(pts) {
+  if(pts.length<=1) return pts;
+  const urgentPenalty = 0; // urgents go first by sorting
+  let sorted = [...pts.slice(1)].sort((a,b)=>(a.urgent?0:1)-(b.urgent?0:1));
+  let route = [pts[0]], remaining = sorted, cur = pts[0];
+  while(remaining.length) {
+    let best=null, bestD=Infinity;
+    remaining.forEach(p=>{
+      let d = Math.hypot(p.x-cur.x, p.y-cur.y);
+      if(!p.urgent) d += 50; // non-urgent penalty keeps urgents first
+      if(d<bestD){bestD=d;best=p}
+    });
+    route.push(best); remaining=remaining.filter(p=>p!==best); cur=best;
+  }
+  return route;
+}
+
+function drawRoute(animate=false) {
+  const canvas = document.getElementById('route-canvas');
+  if(!canvas) return;
+  const W = canvas.offsetWidth||620, H = 400;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0d1120';
+  ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(30,42,64,0.8)'; ctx.lineWidth=0.5;
+  for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+
+  const scaleX = W/640, scaleY = H/420;
+  const pts = routeStops.map(s=>({...s, px:Math.min(s.x*scaleX, W-30), py:Math.min(s.y*scaleY, H-30)}));
+
+  // Solve route
+  const ordered = tspRoute(pts);
+
+  // Draw route path
+  if(ordered.length>1) {
+    // Shadow
+    ctx.shadowColor='rgba(0,194,168,0.3)'; ctx.shadowBlur=8;
+    ctx.strokeStyle='rgba(0,194,168,0.4)'; ctx.lineWidth=3;
+    ctx.setLineDash([6,5]);
+    ctx.beginPath();
+    ordered.forEach((p,i)=>{if(i===0)ctx.moveTo(p.px,p.py);else ctx.lineTo(p.px,p.py)});
+    ctx.lineTo(ordered[0].px, ordered[0].py);
+    ctx.stroke(); ctx.setLineDash([]); ctx.shadowBlur=0;
+  }
+
+  // Draw route order numbers between stops
+  for(let i=1;i<ordered.length;i++){
+    const a=ordered[i-1], b=ordered[i];
+    const mx=(a.px+b.px)/2, my=(a.py+b.py)/2;
+    ctx.fillStyle='rgba(0,194,168,0.7)'; ctx.font='500 9px IBM Plex Mono,monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+  }
+
+  // Draw stops
+  ordered.forEach((p,i)=>{
+    const color = p.base ? '#eef1f8' : p.urgent ? '#ef4444' : '#00c2a8';
+    const radius = p.base ? 14 : 11;
+
+    // Glow
+    ctx.shadowColor=color; ctx.shadowBlur=12;
+    ctx.fillStyle=color+'22';
+    ctx.beginPath(); ctx.arc(p.px,p.py,radius+4,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+
+    // Circle
+    ctx.strokeStyle=color; ctx.lineWidth=p.urgent?2.5:1.5;
+    ctx.fillStyle=color+'1a';
+    ctx.beginPath(); ctx.arc(p.px,p.py,radius,0,Math.PI*2);
+    ctx.fill(); ctx.stroke();
+
+    // Center dot
+    ctx.fillStyle=color;
+    ctx.beginPath(); ctx.arc(p.px,p.py,p.base?5:4,0,Math.PI*2); ctx.fill();
+
+    // Order number
+    if(!p.base) {
+      ctx.fillStyle=color; ctx.font='600 9px IBM Plex Mono,monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(i, p.px, p.py);
+    }
+
+    // Label
+    ctx.fillStyle='rgba(238,241,248,0.9)'; ctx.font='500 10px Mulish,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    const label = p.name.length>18 ? p.name.slice(0,18)+'…' : p.name;
+    // bg
+    const tw = ctx.measureText(label).width+8;
+    ctx.fillStyle='rgba(13,17,32,0.8)';
+    ctx.fillRect(p.px-tw/2, p.py-radius-18, tw, 14);
+    ctx.fillStyle='rgba(238,241,248,0.85)';
+    ctx.fillText(label, p.px, p.py-radius-6);
+
+    // Urgent indicator
+    if(p.urgent && !p.base) {
+      ctx.fillStyle='#ef4444'; ctx.font='bold 10px sans-serif';
+      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillText('!', p.px+radius-2, p.py-radius-2);
+    }
+  });
+}
+
+// ── Urgent Queue ──────────────────────────────────────────
+function renderUrgentPage() {
+  const urgents = Object.values(INV).filter(c=>c.urgent && c.status!=='empty');
+  const overdue = urgents.filter(c=>c.added && daysDiff(c.added)>1).length;
+  document.getElementById('urg-stat1').textContent = urgents.length;
+  document.getElementById('urg-stat2').textContent = overdue;
+  document.getElementById('urg-stat3').textContent = Math.floor(Math.random()*4)+2;
+
+  const el = document.getElementById('urgent-list');
+  if(!urgents.length) {
+    el.innerHTML = '<div class="alert alert-teal"><span class="alert-icon">✓</span>No urgent carpets — great work!</div>';
+    return;
+  }
+  el.innerHTML = `<table class="tbl"><thead><tr><th>ID</th><th>Customer</th><th>Category</th><th>Area</th><th>Days Waiting</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+    ${urgents.map(c=>`<tr>
+      <td><span class="mono">${c.id}</span></td>
+      <td>${c.customer||'—'}</td>
+      <td><span class="tag tag-${c.cat.toLowerCase()}">${c.cat}</span></td>
+      <td class="mono">${c.area} m²</td>
+      <td class="mono ${c.added&&daysDiff(c.added)>1?'red-c':'amber'}">${c.added?daysDiff(c.added)+'d':'-'}</td>
+      <td>${statusTag(c)}</td>
+      <td>
+        <button class="btn btn-ghost btn-xs" onclick="resolveUrgent('${c.id}')">✓ Resolve</button>
+        <button class="btn btn-teal btn-xs" style="margin-left:4px" onclick="addUrgentToRoute('${c.id}')">Add to Route</button>
+      </td>
+    </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function markUrgent() {
+  const id = document.getElementById('urg-input').value.trim().toUpperCase();
+  const reason = document.getElementById('urg-reason').value;
+  if(!INV[id]) { alert('Carpet ID not found: '+id); return; }
+  INV[id].urgent = true;
+  INV[id].urgentReason = reason;
+  document.getElementById('urg-input').value = '';
+  renderUrgentPage();
+  document.getElementById('urg-count').textContent = Object.values(INV).filter(c=>c.urgent).length;
+  showToast('Carpet '+id+' marked urgent 🚨');
+}
+
+function quickMarkUrgent(id) {
+  INV[id].urgent = true;
+  renderDashboard();
+  document.getElementById('urg-count').textContent = Object.values(INV).filter(c=>c.urgent).length;
+  showToast('Carpet '+id+' marked urgent 🚨');
+}
+
+function resolveUrgent(id) {
+  INV[id].urgent = false;
+  renderUrgentPage();
+  document.getElementById('urg-count').textContent = Object.values(INV).filter(c=>c.urgent).length;
+  showToast('Carpet '+id+' resolved ✓');
+}
+
+function addUrgentToRoute(id) {
+  const c = INV[id];
+  if(routeStops.find(s=>s.carpetId===id)) { showToast('Already in route!'); return; }
+  routeStops.push({id:stopCounter++,name:c.customer||id,carpetId:id,x:80+Math.random()*460,y:60+Math.random()*300,base:false,urgent:true});
+  showToast('Added '+id+' to route 🗺️');
+}
+
+// ── Cleaning Timers ───────────────────────────────────────
+function startTimer() {
+  const id = document.getElementById('timer-input').value.trim().toUpperCase();
+  const mins = parseInt(document.getElementById('timer-type').value);
+  if(!INV[id]) { alert('Carpet ID not found'); return; }
+  INV[id].status = 'cleaning';
+  INV[id].cleanStart = Date.now();
+  INV[id].cleanDuration = mins;
+  activeTimers[id] = {start:Date.now(), duration:mins*60};
+  document.getElementById('timer-input').value='';
+  renderTimers();
+  showToast('Timer started for '+id+' ▶');
+}
+
+function renderTimers() {
+  const cleaning = Object.values(INV).filter(c=>c.status==='cleaning' && c.cleanStart);
+  document.getElementById('active-timer-count').textContent = cleaning.length + ' active';
+  document.getElementById('clean-active').textContent = cleaning.length;
+  document.getElementById('clean-done').textContent = Object.values(INV).filter(c=>c.status==='clean').length;
+
+  const el = document.getElementById('timer-list');
+  if(!cleaning.length) {
+    el.innerHTML = '<div class="alert alert-teal" style="margin-bottom:12px"><span class="alert-icon">ℹ</span>No active cleaning sessions.</div>';
+    return;
+  }
+  el.innerHTML = cleaning.map(c=>{
+    const elapsed = Math.floor((Date.now() - c.cleanStart)/1000);
+    const total = (c.cleanDuration||30)*60;
+    const remaining = Math.max(0, total-elapsed);
+    const pct = Math.min(100, Math.round(elapsed/total*100));
+    const rm = Math.floor(remaining/60), rs = remaining%60;
+    const overdue = remaining===0;
+    return `<div class="sched-item ${overdue?'urgent-item':''}" style="margin-bottom:8px;flex-direction:column;align-items:stretch">
+      <div class="flex justify-between items-center mb8" style="margin-bottom:6px">
+        <div class="flex items-center gap8" style="gap:8px">
+          <span class="mono teal">${c.id}</span>
+          <span class="text-sm">${c.customer||'—'}</span>
+          <span class="tag tag-${c.cat.toLowerCase()}">${c.cat}</span>
+        </div>
+        <div class="flex items-center gap8" style="gap:8px">
+          ${overdue?'<span class="tag tag-urgent">OVERDUE</span>':`<span class="mono ${remaining<300?'red-c':'teal'}">${String(rm).padStart(2,'0')}:${String(rs).padStart(2,'0')} left</span>`}
+          <button class="btn btn-teal btn-xs" onclick="completeCleaning('${c.id}')">✓ Done</button>
+        </div>
+      </div>
+      <div class="prog-bg" style="height:6px">
+        <div class="prog-fill" style="width:${pct}%;background:${overdue?'var(--red)':pct>80?'var(--amber)':'var(--teal)'}"></div>
+      </div>
+      <div class="text-xs text-muted mt8" style="margin-top:4px">${pct}% complete · ${c.cleanDuration} min session · Worker: ${c.worker||'Unassigned'}</div>
+    </div>`;
+  }).join('');
+}
+
+function completeCleaning(id) {
+  INV[id].status = 'clean';
+  INV[id].cleanStart = null;
+  delete activeTimers[id];
+  renderTimers();
+  showToast('Carpet '+id+' cleaning complete ✓');
+}
+
+setInterval(()=>{
+  if(document.getElementById('page-cleaning').classList.contains('active')) renderTimers();
+},5000);
+
+// ── Inventory ─────────────────────────────────────────────
+let invFilter = 'all', invStatus = 'all', invSearch = '';
+
+function filterInv(cat, btn) {
+  invFilter = cat;
+  document.querySelectorAll('[id^="fi-"]').forEach(b=>b.classList.remove('teal-on','on'));
+  btn.classList.add('teal-on');
+  renderInventory();
+}
+
+function filterStatus(s, btn) {
+  invStatus = s;
+  document.querySelectorAll('[id^="fs-"]').forEach(b=>b.classList.remove('on','teal-on'));
+  btn.classList.add('on');
+  renderInventory();
+}
+
+function searchInv(q) { invSearch = q.toLowerCase(); renderInventory(); }
+
+function renderInventory() {
+  const cats = invFilter==='all' ? ['A','B','C','D'] : [invFilter];
+  const el = document.getElementById('inv-sections');
+  el.innerHTML = cats.map(cat=>{
+    let cells = Array.from({length:50},(_,i)=>INV[cat+String(i+1).padStart(2,'0')]);
+    if(invStatus!=='all') cells = cells.filter(c=>invStatus==='urgent'?c.urgent:c.status===invStatus);
+    if(invSearch) cells = cells.filter(c=>c.id.toLowerCase().includes(invSearch)||(c.customer||'').toLowerCase().includes(invSearch));
+    const occupied = cells.filter(c=>c.status!=='empty').length;
+    return `<div class="card mb12 cat-strip-${cat.toLowerCase()}" style="margin-bottom:12px">
+      <div class="flex justify-between items-center mb8" style="margin-bottom:10px;cursor:pointer" onclick="toggleCat('${cat}')">
+        <div class="flex items-center gap8" style="gap:10px">
+          <span style="font-size:20px">${{A:'🏠',B:'🏭',C:'🏫',D:'🎨'}[cat]}</span>
+          <div>
+            <div class="section-title" style="color:${CAT_COLORS[cat]}">${cat} – ${CATS[cat]}</div>
+            <div class="text-xs text-muted">${occupied} of ${invFilter==='all'?50:cells.length} slots occupied</div>
+          </div>
+        </div>
+        <div class="flex gap8 items-center" style="gap:8px">
+          <div class="prog-bg" style="width:100px;height:5px"><div class="prog-fill" style="width:${Math.round(occupied/50*100)}%;background:${CAT_COLORS[cat]}"></div></div>
+          <span class="text-xs text-muted" id="cat-toggle-${cat}">▼</span>
+        </div>
+      </div>
+      <div class="inv-grid" id="cat-grid-${cat}">
+        ${cells.map(c=>`
+          <div class="inv-cell ${c.urgent?'urgent':c.status}" id="icell-${c.id}"
+            title="${c.id}${c.customer?' · '+c.customer:''}${c.area?' · '+c.area+'m²':''}"
+            onclick="selectCell('${c.id}')">
+            ${parseInt(c.num)}
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCat(cat) {
+  const el = document.getElementById('cat-grid-'+cat);
+  const tog = document.getElementById('cat-toggle-'+cat);
+  if(el.style.display==='none'){el.style.display='';tog.textContent='▼'}
+  else{el.style.display='none';tog.textContent='▶'}
+}
+
+function selectCell(id) {
+  selectedCell = id;
+  document.querySelectorAll('.inv-cell').forEach(e=>e.classList.remove('selected'));
+  const el = document.getElementById('icell-'+id);
+  if(el) el.classList.add('selected');
+  const c = INV[id];
+  const panel = document.getElementById('cell-panel');
+  panel.style.display='block';
+  document.getElementById('cell-panel-title').textContent = `Cell ${id} — ${c.status==='empty'?'Empty':CATS[c.cat]+' Carpet'}`;
+  document.getElementById('cell-btn-urgent').textContent = c.urgent?'✓ Remove Urgent':'🚨 Mark Urgent';
+  const body = document.getElementById('cell-panel-body');
+  if(c.status==='empty') {
+    body.innerHTML = `<div class="detail-item"><div class="detail-lbl">Status</div><div class="detail-val text-muted">Empty — available</div></div>
+      <div class="detail-item"><div class="detail-lbl">Action</div><button class="btn btn-teal w100" style="width:100%" onclick="openAddModal()">+ Assign Carpet</button></div>`;
+  } else {
+    body.innerHTML = [
+      {l:'Cell ID',v:`<span class="mono teal">${c.id}</span>`},
+      {l:'Category',v:`<span class="tag tag-${c.cat.toLowerCase()}">${c.cat} – ${CATS[c.cat]}</span>`},
+      {l:'Status',v:statusTag(c)},
+      {l:'Customer',v:c.customer||'—'},
+      {l:'Area',v:`<span class="mono">${c.area} m²</span>`},
+      {l:'Urgent',v:c.urgent?'<span class="red-c bold">Yes</span>':'<span class="text-muted">No</span>'},
+      {l:'Worker',v:c.worker||'—'},
+      {l:'Date Added',v:c.added||'—'},
+    ].map(i=>`<div class="detail-item"><div class="detail-lbl">${i.l}</div><div class="detail-val">${i.v}</div></div>`).join('');
+  }
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function toggleCellUrgent() {
+  if(!selectedCell) return;
+  INV[selectedCell].urgent = !INV[selectedCell].urgent;
+  renderInventory();
+  selectCell(selectedCell);
+  document.getElementById('urg-count').textContent = Object.values(INV).filter(c=>c.urgent).length;
+}
+
+function cycleCellStatus() {
+  if(!selectedCell) return;
+  const c = INV[selectedCell];
+  if(c.status==='empty') return;
+  const cycle = ['dirty','cleaning','clean'];
+  const idx = cycle.indexOf(c.status);
+  c.status = cycle[(idx+1)%cycle.length];
+  if(c.status==='cleaning'){c.cleanStart=Date.now(); c.cleanDuration=30;}
+  renderInventory(); selectCell(selectedCell);
+  showToast(`${selectedCell} → ${c.status}`);
+}
+
+function closePanel() {
+  document.getElementById('cell-panel').style.display='none';
+  selectedCell=null;
+  document.querySelectorAll('.inv-cell').forEach(e=>e.classList.remove('selected'));
+}
+
+function selectAndViewCell(id) {
+  nav('inventory');
+  setTimeout(()=>selectCell(id), 350);
+}
+
+// ── Forecast ──────────────────────────────────────────────
+function renderForecast() {
+  const days14 = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals = [19,23,21,26,35,11,7,22,25,20,29,40,12,8];
+  const maxV = Math.max(...vals);
+  const barsEl = document.getElementById('forecast-bars');
+  const lblsEl = document.getElementById('forecast-day-labels');
+  barsEl.innerHTML = vals.map((v,i)=>`
+    <div class="bar-wrap">
+      <div class="bar" style="height:${Math.round(v/maxV*130)}px;background:${v>=35?'#ef4444':v>=28?'#f59e0b':'#00c2a8'};opacity:.85" title="${v} jobs"></div>
+      <div class="bar-val">${v}</div>
+    </div>
+  `).join('');
+  lblsEl.innerHTML = days14.map(d=>`<div style="flex:1;font-size:9px;color:var(--text3);text-align:center">${d}</div>`).join('');
+
+  // ML features
+  document.getElementById('ml-features').innerHTML = [
+    {f:'Day-of-week seasonality',score:'0.94'},
+    {f:'4-week rolling average',score:'0.91'},
+    {f:'School calendar sync',score:'0.87'},
+    {f:'Weather correlation',score:'0.76'},
+    {f:'Customer recurrence',score:'0.82'},
+    {f:'Lag features (7d)',score:'0.89'},
+  ].map(f=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px">
+    <span class="text-muted">${f.f}</span>
+    <span class="mono teal">${f.score}</span>
+  </div>`).join('');
+
+  // Category demand
+  document.getElementById('cat-demand').innerHTML = [
+    {cat:'A',label:'Household',jobs:44,trend:'+9%'},
+    {cat:'B',label:'Industrial',jobs:29,trend:'+3%'},
+    {cat:'C',label:'School',jobs:37,trend:'+21%'},
+    {cat:'D',label:'Design',jobs:14,trend:'-4%'},
+  ].map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+    <span class="flex gap8 items-center" style="gap:8px"><span class="tag tag-${c.cat.toLowerCase()}">${c.cat}</span>${c.label}</span>
+    <span class="flex gap8 items-center" style="gap:10px">
+      <span class="mono text-muted">${c.jobs} jobs est.</span>
+      <span class="bold ${c.trend.startsWith('+')?'green-c':'red-c'}">${c.trend}</span>
+    </span>
+  </div>`).join('');
+
+  // Staffing
+  document.getElementById('staff-recs').innerHTML = `
+    <div class="alert alert-red"><span class="alert-icon">🔴</span>Friday: +2 extra workers needed (35+ jobs predicted)</div>
+    <div class="alert alert-amber"><span class="alert-icon">🟡</span>Next Friday: +3 extra workers (40 jobs — month peak)</div>
+    <div class="alert alert-teal"><span class="alert-icon">🟢</span>Mon–Thu this week: current staff sufficient</div>
+  `;
+  document.getElementById('inv-alerts-fc').innerHTML = `
+    <div class="alert alert-amber" style="margin-bottom:0"><span class="alert-icon">📦</span>Category C (School) forecast 98% full by Thursday — clear 8+ units</div>
+  `;
+}
+
+function rerunForecast() {
+  const btn = event.target;
+  btn.textContent='↻ Running…'; btn.disabled=true;
+  setTimeout(()=>{renderForecast(); btn.textContent='↻ Refresh'; btn.disabled=false;},900);
+}
+
+// ── Analytics ─────────────────────────────────────────────
+function renderAnalytics() {
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals = [22,28,24,31,38,14,9];
+  const maxV = Math.max(...vals);
+  document.getElementById('analytics-bars').innerHTML = vals.map((v,i)=>`
+    <div class="bar-wrap">
+      <div class="bar" style="height:${Math.round(v/maxV*130)}px;background:var(--teal);opacity:.8"></div>
+      <div class="bar-val">${v}</div>
+    </div>
+  `).join('');
+  document.getElementById('analytics-labels').innerHTML = days.map(d=>`<div style="flex:1;font-size:9px;color:var(--text3);text-align:center">${d}</div>`).join('');
+
+  document.getElementById('perf-by-cat').innerHTML = [
+    {cat:'A',label:'Household',avg:'36 min',on_time:'98%',vol:412},
+    {cat:'B',label:'Industrial',avg:'52 min',on_time:'95%',vol:318},
+    {cat:'C',label:'School',avg:'41 min',on_time:'97%',vol:289},
+    {cat:'D',label:'Design',avg:'28 min',on_time:'99%',vol:228},
+  ].map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+    <span class="flex gap8 items-center" style="gap:8px"><span class="tag tag-${c.cat.toLowerCase()}">${c.cat}</span>${c.label}</span>
+    <span class="flex gap8 items-center" style="gap:14px;font-size:12px">
+      <span class="text-muted">Avg: <span class="teal mono">${c.avg}</span></span>
+      <span class="text-muted">On-time: <span class="green-c mono">${c.on_time}</span></span>
+      <span class="text-muted">Vol: <span class="mono">${c.vol}</span></span>
+    </span>
+  </div>`).join('');
+}
+
+// ── Schedule ──────────────────────────────────────────────
+const SCHEDULE_DATA = [
+  {time:'07:30',id:'B14',cat:'B',customer:'Teollisuus Oy',addr:'Pasila Industrial Zone',worker:'Jonas P.',status:'done',urgent:false},
+  {time:'08:30',id:'A07',cat:'A',customer:'Korhonen',addr:'Kallio, Helsinki',worker:'Mikael H.',status:'active',urgent:true},
+  {time:'09:45',id:'C33',cat:'C',customer:'Alppila School',addr:'Alppilankatu 3',worker:'Sari K.',status:'active',urgent:false},
+  {time:'11:00',id:'D05',cat:'D',customer:'Studio Alvar',addr:'Ullanlinna, Helsinki',worker:'Elin V.',status:'pending',urgent:false},
+  {time:'12:30',id:'A31',cat:'A',customer:'Virtanen',addr:'Töölö, Helsinki',worker:'Mikael H.',status:'pending',urgent:true},
+  {time:'14:00',id:'B22',cat:'B',customer:'Metsä Group',addr:'Vuosaari Port Area',worker:'Petri L.',status:'pending',urgent:false},
+  {time:'15:30',id:'C14',cat:'C',customer:'Pasila Academy',addr:'Pasila, Helsinki',worker:'Jonas P.',status:'pending',urgent:true},
+];
+
+function renderSchedule() {
+  const statusColor = {done:'var(--green)',active:'var(--amber)',pending:'var(--text3)'};
+  document.getElementById('schedule-list').innerHTML = SCHEDULE_DATA.map(j=>`
+    <div class="sched-item ${j.urgent?'urgent-item':''}">
+      <span class="sched-time">${j.time}</span>
+      <div class="sched-dot" style="background:${statusColor[j.status]}"></div>
+      <div class="sched-info">
+        <div class="sched-name">${j.urgent?'🚨 ':''}<span class="mono">${j.id}</span> · ${j.customer}</div>
+        <div class="sched-addr">${j.addr} · ${j.worker}</div>
+      </div>
+      <span class="tag tag-${j.cat.toLowerCase()}" style="font-size:10px">${j.cat}</span>
+      <span class="tag ${j.status==='done'?'tag-ok':j.status==='active'?'tag-warn':'tag-cleaning'}" style="font-size:10px">${j.status}</span>
+    </div>
+  `).join('');
+
+  const staff = [
+    {name:'Mikael H.',jobs:2,status:'On route',avatar:'MH'},
+    {name:'Sari K.',jobs:1,status:'At site',avatar:'SK'},
+    {name:'Jonas P.',jobs:2,status:'On route',avatar:'JP'},
+    {name:'Elin V.',jobs:1,status:'Idle',avatar:'EV'},
+    {name:'Petri L.',jobs:1,status:'Pending',avatar:'PL'},
+  ];
+  document.getElementById('staff-on-shift').innerHTML = staff.map(s=>`
+    <div class="sched-item" style="margin-bottom:5px;padding:8px 12px">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--navy5);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--teal);flex-shrink:0">${s.avatar}</div>
+      <div class="sched-info"><div class="sched-name">${s.name}</div><div class="sched-addr">${s.jobs} jobs today</div></div>
+      <span class="tag ${s.status==='Idle'?'tag-ok':s.status==='On route'?'tag-warn':'tag-cleaning'}" style="font-size:10px">${s.status}</span>
+    </div>
+  `).join('');
+
+  const done = SCHEDULE_DATA.filter(j=>j.status==='done').length;
+  const active = SCHEDULE_DATA.filter(j=>j.status==='active').length;
+  const pending = SCHEDULE_DATA.filter(j=>j.status==='pending').length;
+  document.getElementById('shift-summary').innerHTML = `
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span class="text-muted">Completed</span><span class="mono green-c">${done}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span class="text-muted">In Progress</span><span class="mono amber">${active}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><span class="text-muted">Pending</span><span class="mono text-muted">${pending}</span></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:13px"><span class="text-muted">Total Jobs</span><span class="mono teal">${SCHEDULE_DATA.length}</span></div>
+  `;
+}
+
+function quickAssign() {
+  const id = document.getElementById('qa-carpet').value.trim().toUpperCase();
+  const worker = document.getElementById('qa-staff').value;
+  if(!id) return;
+  if(INV[id]) { INV[id].worker=worker; showToast(`${id} assigned to ${worker}`); }
+  else showToast('Carpet ID not found', true);
+  document.getElementById('qa-carpet').value='';
+}
+
+function addJobModal() { showToast('Job scheduling form — coming soon 📋'); }
+
+// ── Modal ─────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('add-modal').classList.remove('open');
+}
+function saveCarpet() {
+  const id = document.getElementById('m-id').value.trim().toUpperCase();
+  if(!id || !INV[id]) { alert('Invalid cell ID. Use format A01–A50, B01–B50, C01–C50, D01–D50'); return; }
+  const c = INV[id];
+  c.status = document.getElementById('m-status').value;
+  c.customer = document.getElementById('m-customer').value;
+  c.area = parseFloat(document.getElementById('m-size').value)||0;
+  c.urgent = document.getElementById('m-urgent').value==='yes';
+  c.notes = document.getElementById('m-notes').value;
+  c.added = new Date().toISOString().slice(0,10);
+  closeModal();
+  renderDashboard();
+  document.getElementById('urg-count').textContent = Object.values(INV).filter(c=>c.urgent).length;
+  showToast('Carpet '+id+' saved ✓');
+}
+
+// ── Toast ──────────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg, isError=false) {
+  let t = document.getElementById('toast');
+  if(!t) {
+    t = document.createElement('div');
+    t.id='toast';
+    t.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;font-family:Mulish,sans-serif;transition:all .3s;transform:translateY(20px);opacity:0;max-width:320px;line-height:1.4';
+    document.body.appendChild(t);
+  }
+  t.style.background = isError ? '#3d0f0f' : '#003d36';
+  t.style.border = `1px solid ${isError?'rgba(239,68,68,.4)':'rgba(0,194,168,.4)'}`;
+  t.style.color = isError ? '#f87171' : '#00e8ca';
+  t.textContent = msg;
+  setTimeout(()=>{t.style.transform='translateY(0)';t.style.opacity='1'},10);
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(()=>{t.style.transform='translateY(20px)';t.style.opacity='0'},3000);
+}
+
+// ── Init ───────────────────────────────────────────────────
+document.getElementById('urg-count').textContent = Object.values(INV).filter(c=>c.urgent).length;
+renderDashboard();
+renderInventory();
+renderForecast();
+renderAnalytics();
+renderSchedule();
+renderTimers();
+renderUrgentPage();
+renderStopList();
+
+// Resize route canvas
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('page-route').classList.contains('active')) drawRoute();
+});
+</script>
+</body>
+</html>
